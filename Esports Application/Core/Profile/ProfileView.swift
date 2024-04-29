@@ -8,13 +8,15 @@
 
 import FirebaseFirestore
 import SwiftUI
-
+import Firebase
 
 struct ProfileView: View {
     var user: User? // Change to optional user
-    let organisationName: String
     @EnvironmentObject var viewModel: AuthViewModel
     @State private var isDropDownOpen = false // State to track dropdown open/close
+    @State private var organisationName: String = ""
+    @State private var showAlert = false // State to control the alert
+    @State private var isEditMode = false // State to track edit mode
     
     var body: some View {
         NavigationView {
@@ -35,26 +37,53 @@ struct ProfileView: View {
                                         .background(Color(.systemGray3))
                                         .clipShape(Circle())
                                     
-                                    // Name area
-                                    Text(user.fullname)
-                                        .font(.subheadline)
-                                        .fontWeight(.semibold)
-                                        .padding(.top, 1)
-                                    
-                                    // Email Area
-                                    Text(user.email)
-                                        .font(.footnote)
-                                        .foregroundColor(.gray)
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        // Name area
+                                        Text(user.fullname)
+                                            .font(.subheadline)
+                                            .fontWeight(.semibold)
+                                            .padding(.top, 1)
+                                        
+                                        // Email Area
+                                        Text(user.email)
+                                            .font(.footnote)
+                                            .foregroundColor(.gray)
+                                        
+                                        // Achievments Area
+                                        Text("Gaming Achievments:")
+                                            .font(.footnote)
+                                            .foregroundColor(.gray)
+                                    }
                                 }
+                                
                                 .padding(.leading, 8) // Add padding between the initials and the content
                             } else {
                                 Text("No user found")
                             }
-                            HStack {
-                                Text("Organization Name: \(organisationName)")
+                        }
+
+                        HStack(alignment: .top) {
+                            Spacer()
+                                HStack {
+                                    Text("Team Name: \(organisationName)")
+                                        .font(.subheadline)
+                                        .fontWeight(.semibold)
+                            }
+                            Spacer()
+                        }
+                            
+                                if isEditMode { //in edit mode
+                                    HStack(alignment: .top){
+                                    TextField("Enter Team Name", text: $organisationName)
+                                        .padding()
+                                        .background(Color(.systemGray).opacity(0.4))
+                                        .cornerRadius(8)
+                                        .padding(.horizontal)
+                                        .autocapitalization(.none)
+                                }
                             }
                         }
-                    }
+                    
                     
                     Section(header: Text("Current Games Supported:")
                         .font(.headline) // Larger font size
@@ -78,7 +107,7 @@ struct ProfileView: View {
                         .font(.headline) // Larger font size
                         .foregroundColor(.white) // Text color
                     ) {
-                        Text("Beyond All reason game stats have been added to osTas Esports Application.")
+                        Text("Beyond All reason game stats have been added to 'osTas'")
                             .foregroundColor(.white)
                     }
                     
@@ -95,6 +124,22 @@ struct ProfileView: View {
                     }
                 }
                 
+                    if isEditMode{
+                        Button(action: {
+                            // Save the organization name
+                            viewModel.saveOrganisationName(organisationName: organisationName){
+                                showAlert = true
+                            }
+                        }) {
+                            Text("Save Team Name")
+                                .foregroundColor(.white)
+                                .padding()
+                                .background(Color.blue)
+                                .cornerRadius(8)
+                        }
+                        .padding()
+                    }
+                
             
                 // Dropdown Menu
                 HStack {
@@ -102,12 +147,30 @@ struct ProfileView: View {
                     Button(action: {
                         isDropDownOpen.toggle()
                     }) {
-                        Text("Settings")
-                            .font(.subheadline)
-                            .foregroundColor(.white)
-                        
-                        Image(systemName: isDropDownOpen ? "chevron.down.circle.fill" : "chevron.up.circle.fill")
-                            .font(.title)
+                        HStack {
+                                
+                                Button(action: {
+                                    isEditMode.toggle() // Toggle edit mode
+                                }) {
+                                    Text(isEditMode ? "Done" : "Edit Profile")
+                                        .font(.subheadline)
+                                        .foregroundColor(.white)
+                                        .padding()
+                                        .background(Color.blue)
+                                        .cornerRadius(8)
+                                }
+                                .padding()
+                                .foregroundColor(.blue)
+                                
+                                Spacer()
+                            
+                                Text("Settings")
+                                    .font(.subheadline)
+                                    .foregroundColor(.white)
+                                
+                                Image(systemName: isDropDownOpen ? "chevron.down.circle.fill" : "chevron.up.circle.fill")
+                                    .font(.title)
+                        }
                     }
                     .padding()
                     .foregroundColor(.blue)
@@ -123,9 +186,9 @@ struct ProfileView: View {
                 HStack {
                     Spacer()
                     // Usage of CustomBarButton
-                    CustomBarButton(systemName: "house", destination: AnyView(ContentView()))
-                    CustomBarButton(systemName: "magnifyingglass", destination: AnyView(searchPage()))
-                    CustomBarButton(systemName: "message", destination: AnyView(chatLog()))
+                    CustomBarButton(systemName: "house", destination: AnyView(ContentView()), isFirstOrSecond: true)
+                    CustomBarButton(systemName: "magnifyingglass", destination: AnyView(searchPage()), isFirstOrSecond: true)
+                    CustomBarButton(systemName: "message", destination: AnyView(chatLog()), isFirstOrSecond: false)
                     Spacer()
                 }
                 .background(Color.black)
@@ -134,17 +197,31 @@ struct ProfileView: View {
             .foregroundColor(.white)
             .preferredColorScheme(.dark)
             .onAppear {
+                // Fetch organisation name from the database
+                viewModel.fetchOrganisationName { result in
+                    switch result {
+                    case .success(let name):
+                        DispatchQueue.main.async {
+                            organisationName = name
+                        }
+                    case .failure(let error):
+                        print("Error fetching team name: \(error)")
+                    }
+                }
+            }
+            .alert(isPresented: $showAlert) {
+                Alert(title: Text("Team Created"), message: Text("The team has been created successfully."), dismissButton: .default(Text("OK")))
             }
         }
+        .navigationBarBackButtonHidden(true)
     }
 }
-
     
 struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
         // Preview with a sample user
-        let user = User(id: "", fullname: "", email: "")
-        let organisationName = ""
-        return ProfileView(user: user, organisationName: organisationName)
+        let user = User(id: "", fullname: "", email: "", organisationName: "")
+        return ProfileView(user: user)
+            .environmentObject(AuthViewModel()) // Provide the environment object
     }
 }

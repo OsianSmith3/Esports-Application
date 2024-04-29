@@ -125,6 +125,7 @@ struct LineChart: View {
     let data: LineChartData
     var body: some View {
            ScrollView(.horizontal) {
+               Spacer()
                HStack(spacing: 6) {
                    VStack {
                            Group{

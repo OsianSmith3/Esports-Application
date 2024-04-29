@@ -13,7 +13,6 @@ struct searchPage: View {
     @State private var searchResults: [User] = []
     @State private var isProfileViewPresented = false
     @State private var selectedUserProfile: User? = nil
-    @State private var organisationName = ""
     @State private var showAlert = false // Add state for showing alert
 
     var body: some View {
@@ -24,6 +23,7 @@ struct searchPage: View {
                     .padding()
                     .background(Color(.systemGray).opacity(0.4))
                     .cornerRadius(8)
+                    .autocapitalization(.none)
                 
                 // List of search results
                 ScrollViewReader { proxy in
@@ -47,34 +47,15 @@ struct searchPage: View {
                     }
                 }
                 
-                // TextField for organization name
-                TextField("Organisation Name", text: $organisationName)
-                    .padding()
-                    .background(Color(.systemGray).opacity(0.4))
-                    .cornerRadius(8)
-                    .padding(.horizontal)
-                
-                // Button to save organization name to Firebase
-                Button(action: {
-                    saveOrganisationName()
-                }) {
-                    Text("Create Organization")
-                        .foregroundColor(.white)
-                        .padding()
-                        .background(Color.blue)
-                        .cornerRadius(8)
-                }
-                .padding()
-                
                 Spacer()
                 
                 // Bottom Bar with adjusted spacing for icons and grey line separator
                 HStack {
                     Spacer()
                     // Usage of CustomBarButton
-                    CustomBarButton(systemName: "house", destination: AnyView(ContentView()))
-                    CustomBarButton(systemName: "magnifyingglass", destination: AnyView(searchPage()))
-                    CustomBarButton(systemName: "message", destination: AnyView(chatLog()))
+                    CustomBarButton(systemName: "house", destination: AnyView(ContentView()), isFirstOrSecond: true)
+                    CustomBarButton(systemName: "magnifyingglass", destination: AnyView(searchPage()), isFirstOrSecond: true)
+                    CustomBarButton(systemName: "message", destination: AnyView(chatLog()), isFirstOrSecond: false)
                     Spacer()
                 }
                 .background(Color.black)
@@ -89,9 +70,10 @@ struct searchPage: View {
         }
         .sheet(isPresented: $isProfileViewPresented) {
             if let user = selectedUserProfile {
-                ProfileView(user: user, organisationName: organisationName)
+                ProfileView(user: user)
             }
         }
+        .navigationBarBackButtonHidden(true)
     }
     
     func searchUsers(query: String) {
@@ -110,7 +92,7 @@ struct searchPage: View {
                     guard let name = data["fullname"] as? String else {
                         return nil
                     }
-                    return User(id: document.documentID, fullname: name, email: data["email"] as? String ?? "")
+                    return User(id: document.documentID, fullname: name, email: data["email"] as? String ?? "", organisationName: "")
                 }
                 DispatchQueue.main.async {
                     if query.isEmpty {
@@ -121,29 +103,5 @@ struct searchPage: View {
                 }
             }
     }
-    
-    func saveOrganisationName() {
-        let db = Firestore.firestore()
-        let organisationsRef = db.collection("organisations")
-        organisationsRef.addDocument(data: ["name": organisationName]) { error in
-            if let error = error {
-                print("Error adding organization: \(error)")
-            } else {
-                print("Organization added successfully!")
-
-                // Update the user's document with the organization's name
-                if let currentUser = Auth.auth().currentUser {
-                    let usersRef = db.collection("users").document(currentUser.uid)
-                    usersRef.updateData(["organisationName": organisationName]) { error in
-                        if let error = error {
-                            print("Error updating user document: \(error)")
-                        } else {
-                            print("User document updated with organization name")
-                            showAlert = true // Show alert when organization is successfully created
-                        }
-                    }
-                }
-            }
-        }
-    }
 }
+

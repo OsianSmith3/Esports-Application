@@ -21,26 +21,26 @@ class AuthViewModel: ObservableObject {
     init() {
         self.userSession = Auth.auth().currentUser
         
-        Task{
+        Task {
             await fetchUser()
         }
     }
     
     func signIn(withEmail email: String, password: String) async throws {
-        do{
+        do {
             let result = try await Auth.auth().signIn(withEmail: email, password: password)
             self.userSession = result.user
             await fetchUser()
-        }catch {
+        } catch {
             print("DEBUG: Failed to log in with error \(error.localizedDescription)")
         }
     }
     
-    func createUser(withEmail email: String, password: String, fullname: String) async throws {
+    func createUser(withEmail email: String, password: String, fullname: String, organisationName: String) async throws {
         do {
             let result = try await Auth.auth().createUser(withEmail: email, password: password)
             self.userSession = result.user
-            let user = User(id: result.user.uid, fullname: fullname, email: email)
+            let user = User(id: result.user.uid, fullname: fullname, email: email, organisationName: organisationName)
             let encodedUser = try Firestore.Encoder().encode(user)
             try await Firestore.firestore().collection("users").document(user.id).setData(encodedUser)
             await fetchUser()
@@ -51,23 +51,87 @@ class AuthViewModel: ObservableObject {
     
     func signOut() {
         do {
-            try Auth.auth().signOut()  //signs out user on backend
-            self.userSession = nil    //wipes out user session and takes us back to login screen
-            self.currentUser = nil   //wipes out current user data model
-        }catch{
+            try Auth.auth().signOut()  // signs out user on backend
+            self.userSession = nil    // wipes out user session and takes us back to the login screen
+            self.currentUser = nil   // wipes out current user data model
+        } catch {
             print("DEBUG: Failed to sign out with error \(error.localizedDescription)")
         }
     }
     
-    func deleteAccount() {
+    func saveOrganisationName(organisationName: String, completion: @escaping () -> Void) {
+        let db = Firestore.firestore()
+        // Update the user's document with the organization's name
+        if let currentUser = Auth.auth().currentUser {
+            let usersRef = db.collection("users").document(currentUser.uid)
+            usersRef.updateData(["organisationName": organisationName]) { error in
+                if let error = error {
+                    print("Error updating user document: \(error)")
+                } else {
+                    print("User document updated with organization name")
+                    // Toggle showAlert state when the organization name is successfully saved
+                    completion()
+                }
+            }
+        }
+    }
+    
+    func fetchOrganisationName(completion: @escaping (Result<String, Error>) -> Void) {
+        guard let currentUser = Auth.auth().currentUser else {
+            completion(.failure(FetchError.currentUserNotFound))
+            return
+        }
         
+        let db = Firestore.firestore()
+        let userRef = db.collection("users").document(currentUser.uid)
+        
+        userRef.getDocument { document, error in
+            if let document = document, document.exists {
+                if let organisationName = document.data()?["organisationName"] as? String {
+                    completion(.success(organisationName))
+                } else {
+                    completion(.failure(FetchError.noOrganisationName))
+                }
+            } else {
+                completion(.failure(error ?? FetchError.unknown))
+            }
+        }
+    }
+
+
+    enum FetchError: Error {
+        case noOrganisationName
+        case currentUserNotFound
+        case unknown
+    }
+    
+    func deleteAccount() async {
+        do {
+            guard let user = Auth.auth().currentUser else {
+                print("No user is currently signed in.")
+                return
+            }
+            
+            try await user.delete()
+            self.userSession = nil    // Clear user session
+            self.currentUser = nil    // Clear current user data
+            
+            print("User account deleted successfully.")
+        } catch {
+            print("Error deleting user account: \(error.localizedDescription)")
+        }
     }
     
     func fetchUser() async {
         guard let uid = Auth.auth().currentUser?.uid else { return }
         
-        guard let snapshot = try? await Firestore.firestore().collection("users").document(uid).getDocument() else { return }
-        self.currentUser = try? snapshot.data(as: User.self)
+        do {
+            let userSnapshot = try await Firestore.firestore().collection("users").document(uid).getDocument()
+            let userData = try userSnapshot.data(as: User.self)
+            self.currentUser = userData
+        } catch {
+            print("Error fetching user data: \(error.localizedDescription)")
+        }
     }
 }
 
