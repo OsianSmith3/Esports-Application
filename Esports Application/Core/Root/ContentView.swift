@@ -13,7 +13,7 @@ struct ContentView: View {
     var body: some View {
         Group {
             if let user = viewModel.currentUser { // Assuming currentUser holds the user data
-                ProfileView(user: user) 
+                ProfileView(user: user, isCurrentUserProfile: true) 
             } else {
                 LoginView()
             }

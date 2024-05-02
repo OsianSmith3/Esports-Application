@@ -17,6 +17,7 @@ struct ProfileView: View {
     @State private var organisationName: String = ""
     @State private var showAlert = false // State to control the alert
     @State private var isEditMode = false // State to track edit mode
+    var isCurrentUserProfile: Bool // Property to determine if it's the current user's profile
     
     var body: some View {
         NavigationView {
@@ -140,14 +141,14 @@ struct ProfileView: View {
                         .padding()
                     }
                 
-            
-                // Dropdown Menu
-                HStack {
-                    Spacer()
-                    Button(action: {
-                        isDropDownOpen.toggle()
-                    }) {
-                        HStack {
+                if isCurrentUserProfile {
+                    // Dropdown Menu
+                    HStack {
+                        Spacer()
+                        Button(action: {
+                            isDropDownOpen.toggle()
+                        }) {
+                            HStack {
                                 
                                 Button(action: {
                                     isEditMode.toggle() // Toggle edit mode
@@ -163,17 +164,18 @@ struct ProfileView: View {
                                 .foregroundColor(.blue)
                                 
                                 Spacer()
-                            
+                                
                                 Text("Settings")
                                     .font(.subheadline)
                                     .foregroundColor(.white)
                                 
                                 Image(systemName: isDropDownOpen ? "chevron.down.circle.fill" : "chevron.up.circle.fill")
                                     .font(.title)
+                            }
                         }
+                        .padding()
+                        .foregroundColor(.blue)
                     }
-                    .padding()
-                    .foregroundColor(.blue)
                 }
                 
                 // Drop down bar
@@ -221,7 +223,7 @@ struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
         // Preview with a sample user
         let user = User(id: "", fullname: "", email: "", organisationName: "")
-        return ProfileView(user: user)
+        return ProfileView(user: user, isCurrentUserProfile: true)
             .environmentObject(AuthViewModel()) // Provide the environment object
     }
 }

@@ -64,13 +64,10 @@ struct searchPage: View {
             .foregroundColor(.white)
             .preferredColorScheme(.dark)
             .navigationBarTitle("Search for Players")
-            .alert(isPresented: $showAlert) {
-                Alert(title: Text("Organization Created"), message: Text("The organization has been created successfully."), dismissButton: .default(Text("OK")))
-            }
         }
         .sheet(isPresented: $isProfileViewPresented) {
             if let user = selectedUserProfile {
-                ProfileView(user: user)
+                ProfileView(user: user, isCurrentUserProfile: false)
             }
         }
         .navigationBarBackButtonHidden(true)
