@@ -196,7 +196,6 @@ struct ProfileView: View {
                         viewModel.signOut()
                     }
                 }
-                // Bottom Bar with adjusted spacing for icons and grey line separator
                 HStack {
                     Spacer()
                     // Usage of CustomBarButton

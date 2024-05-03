@@ -15,6 +15,7 @@ struct searchPage: View {
     @State private var isProfileViewPresented = false
     @State private var selectedUserProfile: User? = nil
     @State private var showAlert = false // Add state for showing alert
+    @State private var isLoading = true // State to control loading animation
 
     var body: some View {
         NavigationView {
@@ -24,13 +25,11 @@ struct searchPage: View {
                     .padding()
                 Spacer()
                 
-                VStack{
-                    //Here lies the globe::
-                    Onboard3DView()
-                        .ignoresSafeArea()
+                        Onboard3DView()
+                            .ignoresSafeArea()
                     
-                }
-
+                Spacer()
+                
                 // TextField for searching users
                 TextField("Enter Username...", text: $searchText)
                     .padding()
@@ -61,9 +60,7 @@ struct searchPage: View {
                 }
                 
                 Spacer()
-            
                 
-                // Bottom Bar with adjusted spacing for icons and grey line separator
                 HStack {
                     Spacer()
                     // Usage of CustomBarButton
@@ -116,13 +113,32 @@ struct searchPage: View {
 }
 
 struct Onboard3DView: View {
+    @State private var isLoading = true
+
     var body: some View {
-        // fetching from cloud
-        let url = URL(string: "https://build.spline.design/TXeFwdUMc3aUx6H3KlDa/scene.splineswift")!
-
-        // // fetching from local
-        // let url = Bundle.main.url(forResource: "scene", withExtension: "splineswift")!
-
-        try? SplineView(sceneFileURL: url).ignoresSafeArea(.all)
+        ZStack {
+            if isLoading {
+                // Show a loading indicator while the globe is being fetched
+                ProgressView("Loading Animation...")
+                    .progressViewStyle(CircularProgressViewStyle())
+                    .foregroundColor(.blue)
+            } else {
+                // Once loaded, display the globe
+                if let url = URL(string: "https://build.spline.design/TXeFwdUMc3aUx6H3KlDa/scene.splineswift"),
+                   let splineView = try? SplineView(sceneFileURL: url) {
+                    splineView
+                        .ignoresSafeArea()
+                } else {
+                    // Show an error message if the URL is invalid or the globe fails to load
+                    Text("Failed to load 3D view").foregroundColor(.red)
+                }
+            }
+        }
+        .onAppear {
+            // Simulate loading delay
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                isLoading = false
+            }
+        }
     }
 }
