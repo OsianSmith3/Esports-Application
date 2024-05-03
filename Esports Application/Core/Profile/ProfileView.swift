@@ -39,12 +39,24 @@ struct ProfileView: View {
                                         .clipShape(Circle())
                                     
                                     VStack(alignment: .leading, spacing: 4) {
+                                        HStack{
                                         // Name area
-                                        Text(user.fullname)
-                                            .font(.subheadline)
-                                            .fontWeight(.semibold)
-                                            .padding(.top, 1)
-                                        
+                                            Text(user.fullname)
+                                                .font(.subheadline)
+                                                .fontWeight(.semibold)
+                                                .padding(.top, 1)
+                                            
+                                            Spacer()
+                                            
+                                            NavigationLink(destination: chatLog()) {
+                                                Image(systemName: "envelope")
+                                                    .foregroundColor(.white)
+                                                    .padding(5)
+                                                    .background(Color.blue)
+                                                    .cornerRadius(8)
+                                            }
+                                            .frame(width: 8, height: 8) // Set a fixed size for the button
+                                        }
                                         // Email Area
                                         Text(user.email)
                                             .font(.footnote)
@@ -57,7 +69,7 @@ struct ProfileView: View {
                                     }
                                 }
                                 
-                                .padding(.leading, 8) // Add padding between the initials and the content
+                                .padding(.leading, 8) // padding between the initials and the content
                             } else {
                                 Text("No user found")
                             }
