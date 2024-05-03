@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Firebase
+import SplineRuntime
 
 struct searchPage: View {
     @State private var searchText = ""
@@ -18,8 +19,20 @@ struct searchPage: View {
     var body: some View {
         NavigationView {
             VStack {
+                Text("Find Players from across the Globe")
+                    .font(.headline)
+                    .padding()
+                Spacer()
+                
+                VStack{
+                    //Here lies the globe::
+                    Onboard3DView()
+                        .ignoresSafeArea()
+                    
+                }
+
                 // TextField for searching users
-                TextField("Search", text: $searchText)
+                TextField("Enter Username...", text: $searchText)
                     .padding()
                     .background(Color(.systemGray).opacity(0.4))
                     .cornerRadius(8)
@@ -48,6 +61,7 @@ struct searchPage: View {
                 }
                 
                 Spacer()
+            
                 
                 // Bottom Bar with adjusted spacing for icons and grey line separator
                 HStack {
@@ -63,7 +77,6 @@ struct searchPage: View {
             .background(Color.black)
             .foregroundColor(.white)
             .preferredColorScheme(.dark)
-            .navigationBarTitle("Search for Players")
         }
         .sheet(isPresented: $isProfileViewPresented) {
             if let user = selectedUserProfile {
@@ -102,3 +115,14 @@ struct searchPage: View {
     }
 }
 
+struct Onboard3DView: View {
+    var body: some View {
+        // fetching from cloud
+        let url = URL(string: "https://build.spline.design/TXeFwdUMc3aUx6H3KlDa/scene.splineswift")!
+
+        // // fetching from local
+        // let url = Bundle.main.url(forResource: "scene", withExtension: "splineswift")!
+
+        try? SplineView(sceneFileURL: url).ignoresSafeArea(.all)
+    }
+}

@@ -31,6 +31,7 @@
 		28EC21762B6BB20D00F05701 /* BottomBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28EC21752B6BB20D00F05701 /* BottomBar.swift */; };
 		28EC21782B6BB27300F05701 /* searchPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28EC21772B6BB27300F05701 /* searchPage.swift */; };
 		28EC217A2B6BB28200F05701 /* chatLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28EC21792B6BB28200F05701 /* chatLog.swift */; };
+		28FADAE22BE5048D006FFA70 /* SplineRuntime in Frameworks */ = {isa = PBXBuildFile; productRef = 28FADAE12BE5048D006FFA70 /* SplineRuntime */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -83,6 +84,7 @@
 			files = (
 				28B81A512B374AF000BF1789 /* FirebaseAuth in Frameworks */,
 				28B81A572B374AF000BF1789 /* FirebaseStorage in Frameworks */,
+				28FADAE22BE5048D006FFA70 /* SplineRuntime in Frameworks */,
 				28B81A532B374AF000BF1789 /* FirebaseFirestore in Frameworks */,
 				28B81A552B374AF000BF1789 /* FirebaseFirestoreSwift in Frameworks */,
 			);
@@ -267,6 +269,7 @@
 				28B81A522B374AF000BF1789 /* FirebaseFirestore */,
 				28B81A542B374AF000BF1789 /* FirebaseFirestoreSwift */,
 				28B81A562B374AF000BF1789 /* FirebaseStorage */,
+				28FADAE12BE5048D006FFA70 /* SplineRuntime */,
 			);
 			productName = "Esports Application";
 			productReference = 288877492B31006D00A0362A /* Esports Application.app */;
@@ -342,6 +345,7 @@
 			mainGroup = 288877402B31006D00A0362A;
 			packageReferences = (
 				28B81A4F2B374AF000BF1789 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				28FADAE02BE5048D006FFA70 /* XCRemoteSwiftPackageReference "spline-ios" */,
 			);
 			productRefGroup = 2888774A2B31006D00A0362A /* Products */;
 			projectDirPath = "";
@@ -733,6 +737,14 @@
 				minimumVersion = 10.19.1;
 			};
 		};
+		28FADAE02BE5048D006FFA70 /* XCRemoteSwiftPackageReference "spline-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/splinetool/spline-ios";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -755,6 +767,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 28B81A4F2B374AF000BF1789 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseStorage;
+		};
+		28FADAE12BE5048D006FFA70 /* SplineRuntime */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 28FADAE02BE5048D006FFA70 /* XCRemoteSwiftPackageReference "spline-ios" */;
+			productName = SplineRuntime;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
