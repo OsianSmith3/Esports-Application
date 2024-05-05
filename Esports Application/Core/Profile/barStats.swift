@@ -23,6 +23,9 @@ struct UserStatsView: View {
                     .fontWeight(.bold)
                     .padding(.top, 20)
                     .multilineTextAlignment(.center)
+                Text("Example player name: 'Raghna'")
+                    .font(.system(size: 14))
+                    .foregroundColor(.gray)
                 
                 HStack {
                     TextField("Enter username", text: $searchText)
