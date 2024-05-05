@@ -12,12 +12,15 @@ import Firebase
 
 struct ProfileView: View {
     var user: User? // Change to optional user
+    var isCurrentUserProfile: Bool // Property to determine if it's the current user's profile
+    var deleteAccount: () -> Void
     @EnvironmentObject var viewModel: AuthViewModel
     @State private var isDropDownOpen = false // State to track dropdown open/close
     @State private var organisationName: String = ""
-    @State private var showAlert = false // State to control the alert
+    @State private var showTeamCreatedAlert = false // State to control the alert
+    @State private var showAccountDeletedAlert = false
     @State private var isEditMode = false // State to track edit mode
-    var isCurrentUserProfile: Bool // Property to determine if it's the current user's profile
+   
     
     var body: some View {
         NavigationView {
@@ -40,7 +43,7 @@ struct ProfileView: View {
                                     
                                     VStack(alignment: .leading, spacing: 4) {
                                         HStack{
-                                        // Name area
+                                            // Name area
                                             Text(user.fullname)
                                                 .font(.subheadline)
                                                 .fontWeight(.semibold)
@@ -74,28 +77,28 @@ struct ProfileView: View {
                                 Text("No user found")
                             }
                         }
-
+                        
                         HStack(alignment: .top) {
                             Spacer()
-                                HStack {
-                                    Text("Team Name: \(organisationName)")
-                                        .font(.subheadline)
-                                        .fontWeight(.semibold)
+                            HStack {
+                                Text("Team Name: \(organisationName)")
+                                    .font(.subheadline)
+                                    .fontWeight(.semibold)
                             }
                             Spacer()
                         }
-                            
-                                if isEditMode { //in edit mode
-                                    HStack(alignment: .top){
-                                    TextField("Enter Team Name", text: $organisationName)
-                                        .padding()
-                                        .background(Color(.systemGray).opacity(0.4))
-                                        .cornerRadius(8)
-                                        .padding(.horizontal)
-                                        .autocapitalization(.none)
-                                }
+                        
+                        if isEditMode { //in edit mode
+                            HStack(alignment: .top){
+                                TextField("Enter Team Name", text: $organisationName)
+                                    .padding()
+                                    .background(Color(.systemGray).opacity(0.4))
+                                    .cornerRadius(8)
+                                    .padding(.horizontal)
+                                    .autocapitalization(.none)
                             }
                         }
+                    }
                     
                     
                     Section(header: Text("Current Games Supported:")
@@ -137,21 +140,21 @@ struct ProfileView: View {
                     }
                 }
                 
-                    if isEditMode{
-                        Button(action: {
-                            // Save the organization name
-                            viewModel.saveOrganisationName(organisationName: organisationName){
-                                showAlert = true
-                            }
-                        }) {
-                            Text("Save Team Name")
-                                .foregroundColor(.white)
-                                .padding()
-                                .background(Color.blue)
-                                .cornerRadius(8)
+                if isEditMode{
+                    Button(action: {
+                        // Save the organization name
+                        viewModel.saveOrganisationName(organisationName: organisationName){
+                            showTeamCreatedAlert = true
                         }
-                        .padding()
+                    }) {
+                        Text("Save Team Name")
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(Color.blue)
+                            .cornerRadius(8)
                     }
+                    .padding()
+                }
                 
                 if isCurrentUserProfile {
                     // Dropdown Menu
@@ -161,7 +164,6 @@ struct ProfileView: View {
                             isDropDownOpen.toggle()
                         }) {
                             HStack {
-                                
                                 Button(action: {
                                     isEditMode.toggle() // Toggle edit mode
                                 }) {
@@ -190,12 +192,27 @@ struct ProfileView: View {
                     }
                 }
                 
+                
                 // Drop down bar
                 if isDropDownOpen {
                     DropDownBar(isOpen: $isDropDownOpen) {
                         viewModel.signOut()
                     }
+                    // Button to delete account
+                    Button(action: {
+                        // Show delete account alert
+                        showAccountDeletedAlert = true
+                    }) {
+                        Text("Delete Account")
+                            .font(.subheadline)
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(Color.red)
+                            .cornerRadius(8)
+                    }
+                    .padding(.trailing)
                 }
+                
                 HStack {
                     Spacer()
                     // Usage of CustomBarButton
@@ -222,19 +239,35 @@ struct ProfileView: View {
                     }
                 }
             }
-            .alert(isPresented: $showAlert) {
+            .alert(isPresented: $showTeamCreatedAlert) {
                 Alert(title: Text("Team Created"), message: Text("The team has been created successfully."), dismissButton: .default(Text("OK")))
             }
+            .alert(isPresented: $showAccountDeletedAlert) {
+                        // Configure the delete account alert
+                        Alert(
+                            title: Text("Are you sure?"),
+                            message: Text("This action cannot be undone."),
+                            primaryButton: .destructive(Text("Delete"), action: {
+                                // Call delete account function
+                                deleteAccount()
+                            }),
+                            secondaryButton: .cancel()
+                        )
+                    }
         }
         .navigationBarBackButtonHidden(true)
     }
 }
-    
+
 struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
         // Preview with a sample user
         let user = User(id: "", fullname: "", email: "", organisationName: "")
-        return ProfileView(user: user, isCurrentUserProfile: true)
-            .environmentObject(AuthViewModel()) // Provide the environment object
+        let viewModel = AuthViewModel() // Create an instance of AuthViewModel
+        return ProfileView(user: user, isCurrentUserProfile: true, deleteAccount: viewModel.deleteAccount)
+            .environmentObject(viewModel) // Provide the environment object
     }
 }
+
+
+

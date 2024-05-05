@@ -37,10 +37,15 @@ struct LoginView: View {
                                 .fontWeight(.bold)
                                 .foregroundColor(Color(.systemGreen))
                         }else {
-                            Image(systemName: "xmark.circle.fill")
-                                .imageScale(.medium)
-                                .fontWeight(.bold)
-                                .foregroundColor(Color(.systemRed))
+                            VStack{
+                                Image(systemName: "xmark.circle.fill")
+                                    .imageScale(.medium)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(Color(.systemRed))
+                                Text("Must include '@' ")
+                                    .font(.system(size: 10))
+                                    .foregroundColor(.red)
+                            }
                         }
                     }
                 }

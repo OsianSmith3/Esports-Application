@@ -15,7 +15,6 @@ struct DropDownBar: View {
         VStack(alignment: .leading, spacing: 10) {
             Section("Account") {
                 Button(action: {
-                    // Implement sign-out functionality && leave it empty for preview
                     signOutAction()
                 }) {
                     HStack {

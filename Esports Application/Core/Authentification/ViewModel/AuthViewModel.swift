@@ -105,23 +105,39 @@ class AuthViewModel: ObservableObject {
         case unknown
     }
     
-    func deleteAccount() async {
-        do {
-            guard let user = Auth.auth().currentUser else {
-                print("No user is currently signed in.")
+    // Updated deleteAccount function to directly delete the user account
+    func deleteAccount() {
+        guard let user = Auth.auth().currentUser else {
+            print("No user is currently signed in.")
+            return
+        }
+        
+        // Delete user document from Firestore
+        let db = Firestore.firestore()
+        let userDocRef = db.collection("users").document(user.uid)
+        userDocRef.delete { error in
+            if let error = error {
+                print("Error deleting user document: \(error.localizedDescription)")
                 return
             }
             
-            try await user.delete()
-            self.userSession = nil    // Clear user session
-            self.currentUser = nil    // Clear current user data
-            
-            print("User account deleted successfully.")
-        } catch {
-            print("Error deleting user account: \(error.localizedDescription)")
+            // Delete user authentication account
+            user.delete { error in
+                if let error = error {
+                    print("Error deleting user account: \(error.localizedDescription)")
+                    return
+                }
+                
+                // Clear local user session and data
+                self.userSession = nil
+                self.currentUser = nil
+                
+                print("User account and data deleted successfully.")
+            }
         }
     }
-    
+
+     
     func fetchUser() async {
         guard let uid = Auth.auth().currentUser?.uid else { return }
         

@@ -77,7 +77,7 @@ struct searchPage: View {
         }
         .sheet(isPresented: $isProfileViewPresented) {
             if let user = selectedUserProfile {
-                ProfileView(user: user, isCurrentUserProfile: false)
+                ProfileView(user: user, isCurrentUserProfile: false, deleteAccount: {})
             }
         }
         .navigationBarBackButtonHidden(true)

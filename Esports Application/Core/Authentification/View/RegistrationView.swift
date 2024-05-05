@@ -41,10 +41,15 @@ struct RegistrationView: View {
                                     .fontWeight(.bold)
                                     .foregroundColor(Color(.systemGreen))
                             }else {
-                                Image(systemName: "xmark.circle.fill")
-                                    .imageScale(.medium)
-                                    .fontWeight(.bold)
-                                    .foregroundColor(Color(.systemRed))
+                                VStack{
+                                    Image(systemName: "xmark.circle.fill")
+                                        .imageScale(.medium)
+                                        .fontWeight(.bold)
+                                        .foregroundColor(Color(.systemRed))
+                                    Text("Must include '@' ")
+                                        .font(.system(size: 10))
+                                        .foregroundColor(.red)
+                                }
                             }
                         }
                     }
@@ -52,8 +57,8 @@ struct RegistrationView: View {
                 
                 //Name
                     InputView(text: $fullname,
-                              title: "Full Name",
-                              placeholder: "Enter your name")
+                              title: "Username",
+                              placeholder: "Enter your username")
                     
                     //Password
                     InputView(text: $password,
@@ -69,20 +74,32 @@ struct RegistrationView: View {
                                   isSecureField: true)
                         
                         if !password.isEmpty && !confirmPassword.isEmpty {
-                            if password == confirmPassword {
+                            if password == confirmPassword && password.count > 5{
                                 Image(systemName: "checkmark.circle.fill")
-                                .imageScale(.large)
-                                .fontWeight(.bold)
-                                .foregroundColor(Color(.systemGreen))
-                        }else {
-                            Image(systemName: "xmark.circle.fill")
-                                .imageScale(.large)
-                                .fontWeight(.bold)
-                                .foregroundColor(Color(.systemRed))
+                                    .imageScale(.large)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(Color(.systemGreen))
+                            } else {
+                                VStack {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .imageScale(.large)
+                                        .foregroundColor(Color(.systemRed))
+                                    if password.count < 5 {
+                                        Text("5 or more characters needed")
+                                            .font(.system(size: 10))
+                                            .foregroundColor(.red)
+                                    }
+                                    if confirmPassword != password {
+                                        Text("Passwords do not match")
+                                            .font(.system(size: 10))
+                                            .foregroundColor(.red)
+                                    }
+                                }
                             }
                         }
                     }
                 }
+                
                 .padding(.horizontal)
                 .padding(.top, 12)
             
